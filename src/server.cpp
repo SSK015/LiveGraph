@@ -905,6 +905,7 @@ int main(int argc, char** argv)
     }
 
     const int workerCount = std::stoi(std::getenv("LIVEGRAPH_NUM_CLIENTS"));
+    // const int workerCount = 1;
     std::shared_ptr<ThreadManager> threadManager = ThreadManager::newSimpleThreadManager(workerCount);
     threadManager->threadFactory(std::make_shared<ThreadFactory>());
     threadManager->start();
@@ -921,7 +922,7 @@ int main(int argc, char** argv)
     //     std::make_shared<TBufferedTransportFactory>(),
     //     std::make_shared<TBinaryProtocolFactory>());
 
-    system("sudo killall -q -9 sleep");
+    system("killall -q -9 sleep");
     std::cout << "Starting the server..." << std::endl;
     ::server->serve();
     delete ::server;

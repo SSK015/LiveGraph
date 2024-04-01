@@ -9,9 +9,19 @@ link_libraries(Threads::Threads)
 find_package(OpenMP REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-find_package(TBB REQUIRED)
+
+
+message(${CMAKE_SOURCE_DIR})
+# find_package(TBB REQUIRED)
+
+set (TBB_INCLUDE_DIRS "/usr/local/include")
+set (TBB_LIBRARIES "/usr/local/lib/libtbb.so")
+# message(${TBB_LIBRARY_DIRS})
+message(${TBB_INCLUDE_DIRS})
+message(${TBB_LIBRARIES})
+
 include_directories(${TBB_INCLUDE_DIRS})
-link_directories(${TBB_LIBRARY_DIRS})
+# link_directories(${TBB_LIBRARY_DIRS})
 link_libraries(${TBB_LIBRARIES})
 
 include(CheckCXXCompilerFlag)
@@ -22,6 +32,8 @@ else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no march native support.")
 endif()
 
+# set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+# set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING
         "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
