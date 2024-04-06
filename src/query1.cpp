@@ -1,8 +1,10 @@
 #include <iostream>
+#include <chrono>
 #include "manual.hpp"
 
 void InteractiveHandler::query1(std::vector<Query1Response> & _return, const Query1Request& request)
 {
+    // auto start = std::chrono::steady_clock::now();
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
@@ -110,5 +112,11 @@ void InteractiveHandler::query1(std::vector<Query1Response> & _return, const Que
             }
         }
     }
+    // auto end = std::chrono::steady_clock::now();
 
+    // // 计算时间间隔
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    // // 输出时间间隔
+    // std::cout << "Time taken: " << duration.count() << " microseconds" << std::endl;
 }

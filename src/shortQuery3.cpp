@@ -1,9 +1,25 @@
 #include "manual.hpp"
+#include <fstream>
 
 void InteractiveHandler::shortQuery3(std::vector<ShortQuery3Response> & _return, const ShortQuery3Request& request)
 {
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
+    pthread_t tid = pthread_self();
+
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "17";
+        outputFile << " ";
+        outputFile << vid << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     if(vid == (uint64_t)-1) return;
     auto engine = graph->begin_read_only_transaction();
     auto person = (snb::PersonSchema::Person*)engine.get_vertex(vid).data();
