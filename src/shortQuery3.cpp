@@ -12,7 +12,7 @@ void InteractiveHandler::shortQuery3(std::vector<ShortQuery3Response> & _return,
     if (outputFile.is_open()) {
         outputFile << "17";
         outputFile << " ";
-        outputFile << vid << std::endl;
+        outputFile << request.personId << std::endl;
         outputFile.close();
         // std::cout << "Int64写入文件成功" << std::endl;
     } else {
@@ -20,6 +20,7 @@ void InteractiveHandler::shortQuery3(std::vector<ShortQuery3Response> & _return,
         // return 1;
         return;
     }
+    
     if(vid == (uint64_t)-1) return;
     auto engine = graph->begin_read_only_transaction();
     auto person = (snb::PersonSchema::Person*)engine.get_vertex(vid).data();

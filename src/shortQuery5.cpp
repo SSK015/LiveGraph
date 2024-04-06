@@ -12,7 +12,7 @@ void InteractiveHandler::shortQuery5(ShortQuery5Response& _return, const ShortQu
     if (outputFile.is_open()) {
         outputFile << "19";
         outputFile << " ";
-        outputFile << vid << std::endl;
+        outputFile << request.messageId << std::endl;
         outputFile.close();
         // std::cout << "Int64写入文件成功" << std::endl;
     } else {

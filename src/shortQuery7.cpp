@@ -12,7 +12,7 @@ void InteractiveHandler::shortQuery7(std::vector<ShortQuery7Response>& _return, 
     if (outputFile.is_open()) {
         outputFile << "21";
         outputFile << " ";
-        outputFile << vid << std::endl;
+        outputFile << request.messageId << std::endl;
         outputFile.close();
         // std::cout << "Int64写入文件成功" << std::endl;
     } else {

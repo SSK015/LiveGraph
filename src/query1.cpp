@@ -1,12 +1,33 @@
 #include <iostream>
 #include <chrono>
+#include <fstream>
 #include "manual.hpp"
 
 void InteractiveHandler::query1(std::vector<Query1Response> & _return, const Query1Request& request)
 {
     // auto start = std::chrono::steady_clock::now();
     _return.clear();
+
     uint64_t vid = personSchema.findId(request.personId);
+
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "1";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.firstName;
+        outputFile << " ";      
+        outputFile << request.limit << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     if(vid == (uint64_t)-1) return;
     auto engine = graph->begin_read_only_transaction();
     if(engine.get_vertex(vid).data() == nullptr) return;

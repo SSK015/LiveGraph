@@ -14,7 +14,7 @@ void InteractiveHandler::shortQuery1(ShortQuery1Response& _return, const ShortQu
     if (outputFile.is_open()) {
         outputFile << "15";
         outputFile << " ";
-        outputFile << vid << std::endl;
+        outputFile << request.personId << std::endl;
         outputFile.close();
         // std::cout << "Int64写入文件成功" << std::endl;
     } else {

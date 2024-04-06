@@ -11,11 +11,12 @@ void InteractiveHandler::shortQuery2(std::vector<ShortQuery2Response> & _return,
     std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
     if (outputFile.is_open()) {
         outputFile << "16";
-        outputFile << " ";
-        outputFile << request.limit;
-        outputFile << " ";
 
-        outputFile << vid << std::endl;
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.limit << std::endl;
+
         outputFile.close();
         // std::cout << "Int64写入文件成功" << std::endl;
     } else {
