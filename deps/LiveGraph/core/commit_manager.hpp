@@ -20,6 +20,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <iostream>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -153,86 +154,90 @@ namespace livegraph
 
         void server_loop()
         {
-            while (true)
-            {
-                check_unfinished_epoch_id();
-                int local_client_mutex = global_client_mutex.load();
-                std::unique_lock<std::mutex> lock(mutex[local_client_mutex]);
-                auto &local_queue = queue[local_client_mutex];
-                while (local_queue.empty() && !closed.load())
-                {
-                    cv_server.wait_for(lock, SERVER_SPIN_INTERVAL, [&]() {
-                        check_unfinished_epoch_id();
-                        return !local_queue.empty() || closed.load();
-                    });
-                    check_unfinished_epoch_id();
-                    cv_client[local_client_mutex ^ 1].notify_all();
-                }
-                std::unique_lock<std::mutex> client_lock(client_mutex[local_client_mutex]);
+            // auto start = std::chrono::high_resolution_clock::now();
+        //     while (true)
+        //     {
+        //         check_unfinished_epoch_id();
+        //         int local_client_mutex = global_client_mutex.load();
+        //         std::unique_lock<std::mutex> lock(mutex[local_client_mutex]);
+        //         auto &local_queue = queue[local_client_mutex];
+        //         while (local_queue.empty() && !closed.load())
+        //         {
+        //             cv_server.wait_for(lock, SERVER_SPIN_INTERVAL, [&]() {
+        //                 check_unfinished_epoch_id();
+        //                 return !local_queue.empty() || closed.load();
+        //             });
+        //             check_unfinished_epoch_id();
+        //             cv_client[local_client_mutex ^ 1].notify_all();
+        //         }
+        //         std::unique_lock<std::mutex> client_lock(client_mutex[local_client_mutex]);
 
-                global_client_mutex ^= 1;
+        //         global_client_mutex ^= 1;
 
-                size_t num_txns = local_queue.size();
+        //         size_t num_txns = local_queue.size();
 
-                if (!num_txns)
-                    break;
+        //         if (!num_txns)
+        //             break;
 
-                ++writing_epoch_id;
+        //         ++writing_epoch_id;
 
-                unfinished_epoch_id.emplace(writing_epoch_id, 0);
+        //         unfinished_epoch_id.emplace(writing_epoch_id, 0);
 
-                auto &num_unfinished = unfinished_epoch_id.back().second;
+        //         auto &num_unfinished = unfinished_epoch_id.back().second;
 
-                std::string group_wal;
-                group_wal.append(reinterpret_cast<char *>(&writing_epoch_id), sizeof(writing_epoch_id));
-                group_wal.append(reinterpret_cast<char *>(&num_txns), sizeof(num_txns));
+        //         // std::cout << "Start Write" << std::endl;
+        //         // std::cout << sizeof(num_txns) << std::endl;
 
-                for (size_t i = 0; i < num_txns; i++)
-                {
-                    auto &[wal, ret_epoch_id, ret_num] = local_queue.front();
+        //         std::string group_wal;
+        //         // group_wal.append(reinterpret_cast<char *>(&writing_epoch_id), sizeof(writing_epoch_id));
+        //         // group_wal.append(reinterpret_cast<char *>(&num_txns), sizeof(num_txns));
 
-                    group_wal.append(wal);
-                    *ret_epoch_id = writing_epoch_id;
-                    *ret_num = &num_unfinished;
-                    ++num_unfinished;
-                    local_queue.pop();
-                }
+        //         for (size_t i = 0; i < num_txns; i++)
+        //         {
+        //             auto &[wal, ret_epoch_id, ret_num] = local_queue.front();
 
-                auto expected_size = used_size + group_wal.size();
-                if (expected_size > file_size)
-                {
-                    size_t new_file_size = (expected_size / FILE_TRUNC_SIZE + 1) * FILE_TRUNC_SIZE;
-                    if (fd != EMPTY_FD)
-                    {
-                        if (ftruncate(fd, new_file_size) != 0)
-                            throw std::runtime_error("ftruncate wal file error.");
-                    }
-                    file_size = new_file_size;
-                }
+        //             // group_wal.append(wal);
+        //             *ret_epoch_id = writing_epoch_id;
+        //             *ret_num = &num_unfinished;
+        //             ++num_unfinished;
+        //             local_queue.pop();
+        //         }
 
-                used_size += group_wal.size();
+        //         auto expected_size = used_size + group_wal.size();
+        //         if (expected_size > file_size)
+        //         {
+        //             size_t new_file_size = (expected_size / FILE_TRUNC_SIZE + 1) * FILE_TRUNC_SIZE;
+        //             if (fd != EMPTY_FD)
+        //             {
+        //                 if (ftruncate(fd, new_file_size) != 0)
+        //                     throw std::runtime_error("ftruncate wal file error.");
+        //             }
+        //             file_size = new_file_size;
+        //         }
 
-                if (fd != EMPTY_FD)
-                {
-                    if ((size_t)write(fd, group_wal.c_str(), group_wal.size()) != group_wal.size())
-                        std::runtime_error("write wal file error.");
-                }
+        //         // used_size += group_wal.size();
 
-                if (fd != EMPTY_FD)
-                {
-                    if (fdatasync(fd) != 0)
-                        std::runtime_error("fdatasync wal file error.");
-                }
+        //         if (fd != EMPTY_FD)
+        //         {
+        //             // if ((size_t)write(fd, group_wal.c_str(), group_wal.size()) != group_wal.size())
+        //             //     std::runtime_error("write wal file error.");
+        //         }
 
-                ++num_unfinished;
+        //         if (fd != EMPTY_FD)
+        //         {
+        //             if (fdatasync(fd) != 0)
+        //                 std::runtime_error("fdatasync wal file error.");
+        //         }
 
-                lock.unlock();
-                seq_front[local_client_mutex] += num_txns;
-                cv_client[local_client_mutex].notify_all();
-                client_lock.unlock();
+        //         ++num_unfinished;
 
-                --num_unfinished;
-            }
+        //         lock.unlock();
+        //         seq_front[local_client_mutex] += num_txns;
+        //         cv_client[local_client_mutex].notify_all();
+        //         client_lock.unlock();
+
+        //         --num_unfinished;
+        //     }
         }
     };
 

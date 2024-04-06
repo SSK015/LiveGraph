@@ -13,7 +13,7 @@ void InteractiveHandler::query7(std::vector<Query7Response> & _return, const Que
     auto comments = multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Comment_creator});
     std::map<std::pair<int64_t, uint64_t>, std::tuple<uint64_t, uint64_t>> idx;
     std::unordered_map<uint64_t, std::pair<int64_t, uint64_t>> person_hash;
-
+    // std::cout << "query case7" << std::endl;
     for(size_t i=0;i<posts.size();i++)
     {
         uint64_t vid = posts[i];

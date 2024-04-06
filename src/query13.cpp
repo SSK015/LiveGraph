@@ -2,6 +2,7 @@
 
 void InteractiveHandler::query13(Query13Response& _return, const Query13Request& request)
 {
+    // std::cout << "query case13" << std::endl;
     _return.shortestPathLength = -1;
     uint64_t vid1 = personSchema.findId(request.person1Id);
     uint64_t vid2 = personSchema.findId(request.person2Id);

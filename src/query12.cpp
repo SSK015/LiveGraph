@@ -2,6 +2,7 @@
 
 void InteractiveHandler::query12(std::vector<Query12Response> & _return, const Query12Request& request)
 {
+    // std::cout << "query case12" << std::endl;
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
@@ -14,7 +15,7 @@ void InteractiveHandler::query12(std::vector<Query12Response> & _return, const Q
     tags.push_back(std::numeric_limits<uint64_t>::max());
     std::map<std::pair<int, uint64_t>, std::pair<uint64_t, std::vector<uint64_t>>> idx;
 
-
+    // std::cout << "query case12" << std::endl;
     for(size_t i=0;i<friends.size();i++)
     {
         uint64_t vid = friends[i];

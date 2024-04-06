@@ -16,7 +16,7 @@ void InteractiveHandler::query3(std::vector<Query3Response> & _return, const Que
     std::vector<std::tuple<int, uint64_t, int, snb::PersonSchema::Person*>> idx;
 
 
-
+    // std::cout << "query case3" << std::endl;
     for(size_t i=0;i<friends.size();i++)
     {
         auto person = (snb::PersonSchema::Person*)engine.get_vertex(friends[i]).data();

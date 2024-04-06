@@ -109,6 +109,7 @@ EdgeIterator Transaction::get_edges(vertex_t src, label_t label, bool reverse)
 }
 
 timestamp_t Transaction::commit(bool wait_visable) { return txn->commit(wait_visable); }
+// timestamp_t Transaction::commit(bool wait_visable) { return 0; }
 
 void Transaction::abort() { txn->abort(); }
 

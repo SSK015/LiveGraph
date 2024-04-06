@@ -2,6 +2,8 @@
 
 void InteractiveHandler::query14(std::vector<Query14Response> & _return, const Query14Request& request)
 {
+    // std::cout << "query case14" << std::endl;
+        // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     _return.clear();
     uint64_t vid1 = personSchema.findId(request.person1Id);
     uint64_t vid2 = personSchema.findId(request.person2Id);
@@ -30,5 +32,7 @@ void InteractiveHandler::query14(std::vector<Query14Response> & _return, const Q
             _return.back().personIdsInPath.emplace_back(iter->second);
         }
     }
-
+    // std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    // std::chrono::microseconds duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // std::cout << "ATime taken: " << duration.count() << " microseconds" << std::endl;
 }

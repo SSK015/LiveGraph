@@ -1,7 +1,10 @@
+#include <iostream>
+#include <chrono>
 #include "manual.hpp"
 
 void InteractiveHandler::shortQuery1(ShortQuery1Response& _return, const ShortQuery1Request& request)
 {
+    // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     _return = ShortQuery1Response();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
@@ -17,4 +20,7 @@ void InteractiveHandler::shortQuery1(ShortQuery1Response& _return, const ShortQu
     _return.cityId = place->id;
     _return.gender = std::string(person->gender(), person->genderLen());
     _return.creationDate = person->creationDate;
+    // std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    // std::chrono::microseconds duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // std::cout << "Time taken: " << duration.count() << " microseconds" << std::endl;
 }

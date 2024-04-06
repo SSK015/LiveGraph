@@ -2,6 +2,7 @@
 
 void InteractiveHandler::query2(std::vector<Query2Response> & _return, const Query2Request& request)
 {
+        // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
@@ -13,6 +14,7 @@ void InteractiveHandler::query2(std::vector<Query2Response> & _return, const Que
 
     for(size_t i=0;i<friends.size();i++)
     {
+        // std::cout << "query case2" << std::endl;
         auto person = (snb::PersonSchema::Person*)engine.get_vertex(friends[i]).data();
         uint64_t vid = friends[i];
         {

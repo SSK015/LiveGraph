@@ -13,6 +13,8 @@
 #include <tbb/parallel_sort.h>
 #include <tbb/concurrent_vector.h>
 
+#include <unistd.h>
+#include <iostream>
 #include <fcntl.h>
 #include <sys/mman.h>
 
@@ -614,6 +616,7 @@ void importMember(std::string path)
     }
 
     std::vector<uint64_t> dataEdge_posts(dataEdge_vs.size());
+    std::cout << dataEdge_vs.size() << std::endl;
     #pragma omp parallel for
     for(size_t i=0;i<dataEdge_vs.size();i++)
     {
@@ -672,6 +675,9 @@ void importKnows(std::string path)
     }
 
     std::vector<double> dataEdge_weight(dataEdge_vs.size());
+
+    std::cout << dataEdge_vs.size() << std::endl;
+
     #pragma omp parallel for
     for(size_t i=0;i<dataEdge_vs.size();i++)
     {
@@ -730,12 +736,16 @@ public:
     {
         std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(connInfo.transport);
 //        std::cout << "new connection" << std::endl;
-//        std::cout << "Incoming connection\n";
+    //    std::cout << "Incoming connection\n";
 //        std::cout << "\tSocketInfo: "  << sock->getSocketInfo()  << "\n";
 //        std::cout << "\tPeerHost: "    << sock->getPeerHost()    << "\n";
 //        std::cout << "\tPeerAddress: " << sock->getPeerAddress() << "\n";
 //        std::cout << "\tPeerPort: "    << sock->getPeerPort()    << "\n";
+            // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
         return new InteractiveHandler(graph, personSchema, placeSchema, orgSchema, postSchema, commentSchema, tagSchema, tagclassSchema, forumSchema);
+            // std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+            // std::chrono::microseconds duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+            // std::cout << "Time taken: " << duration.count() << " microseconds" << std::endl;
     }
     virtual void releaseHandler( InteractiveIf* handler) {
 //        std::cout << "delete connection" << std::endl;
@@ -745,7 +755,7 @@ public:
 
 void signalHandler(int signum)
 {
-    if(::server) ::server->stop(); 
+    if(::server) ::server->stop();
 }
 
 int main(int argc, char** argv)

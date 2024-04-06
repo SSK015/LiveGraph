@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "blocks.hpp"
 #include "graph.hpp"
@@ -66,9 +67,10 @@ namespace livegraph
               acquired_locks(),
               timestamps_to_update()
         {
-            wal_append((uint64_t)0); // number of operations
-            wal_append(read_epoch_id);
-            wal_append(local_txn_id);
+            // std::cout << "Qidong" << std::endl;
+            // wal_append((uint64_t)0); // number of operations
+            // wal_append(read_epoch_id);
+            // wal_append(local_txn_id);
         }
 
         Transaction(const Transaction &) = delete;
@@ -108,6 +110,7 @@ namespace livegraph
         EdgeIterator get_edges(vertex_t src, label_t label, bool reverse = false);
 
         timestamp_t commit(bool wait_visable = true);
+        // void commit(bool wait_visable = true);
         void abort();
 
         ~Transaction()

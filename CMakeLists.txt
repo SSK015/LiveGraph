@@ -33,22 +33,22 @@ set(THRIFT_GEN_PATH ${CMAKE_BINARY_DIR}/gen-cpp)
 set(THRIFT_CODE_PATH ${CMAKE_SOURCE_DIR}/thrift)
 set(ROCKSDB_CODE_PATH ${CMAKE_SOURCE_DIR}/deps/rocksdb)
 set(LIVEGRAPH_CODE_PATH ${CMAKE_SOURCE_DIR}/deps/LiveGraph)
-add_custom_command(
-OUTPUT
-    # ${THRIFT_GEN_PATH}/interactive_constants.cpp
-    # ${THRIFT_GEN_PATH}/interactive_constants.h
-    ${THRIFT_GEN_PATH}/Interactive_server.skeleton.cpp
-    ${THRIFT_GEN_PATH}/Interactive.cpp
-    ${THRIFT_GEN_PATH}/Interactive.h
-    ${THRIFT_GEN_PATH}/interactive_types.cpp
-    ${THRIFT_GEN_PATH}/interactive_types.h
-COMMAND
-    thrift --gen cpp ${THRIFT_CODE_PATH}/interactive.thrift
-DEPENDS
-    ${THRIFT_CODE_PATH}/interactive.thrift
-WORKING_DIRECTORY
-    ${CMAKE_BINARY_DIR}
-)
+# add_custom_command(
+# OUTPUT
+#     # ${THRIFT_GEN_PATH}/interactive_constants.cpp
+#     # ${THRIFT_GEN_PATH}/interactive_constants.h
+#     ${THRIFT_GEN_PATH}/Interactive_server.skeleton.cpp
+#     ${THRIFT_GEN_PATH}/Interactive.cpp
+#     ${THRIFT_GEN_PATH}/Interactive.h
+#     ${THRIFT_GEN_PATH}/interactive_types.cpp
+#     ${THRIFT_GEN_PATH}/interactive_types.h
+# COMMAND
+#     thrift --gen cpp ${THRIFT_CODE_PATH}/interactive.thrift
+# DEPENDS
+#     ${THRIFT_CODE_PATH}/interactive.thrift
+# WORKING_DIRECTORY
+#     ${CMAKE_BINARY_DIR}
+# )
 include_directories(${THRIFT_GEN_PATH})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -78,12 +78,13 @@ link_directories(${PROJECT_BINARY_DIR}/lib)
 set(PROJECT_DEPS_DIR ${PROJECT_SOURCE_DIR}/deps)
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_DEPS_DIR})
 
-set(USE_SHARED_LIVEGRAPH OFF CACHE BOOL "Use Shared LiveGraph.")
+set(USE_SHARED_LIVEGRAPH ON CACHE BOOL "Use Shared LiveGraph.")
 if(USE_SHARED_LIVEGRAPH)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_SHARED_LIVEGRAPH")
     set(BUILD_SHARED_LIVEGRAPH ON)
 endif()
 add_subdirectory(${PROJECT_DEPS_DIR}/LiveGraph)
+# link_directories(${PROJECT_DEPS_DIR}/LiveGraph/lib)
 
 aux_source_directory(src SOURCES)
 # add_executable(snb_server ${SOURCES} ${THRIFT_GEN_PATH}/interactive_constants.cpp ${THRIFT_GEN_PATH}/Interactive.cpp ${THRIFT_GEN_PATH}/interactive_types.cpp)
@@ -94,10 +95,12 @@ add_executable(snb_server ${SOURCES}  ${THRIFT_GEN_PATH}/Interactive.cpp ${THRIF
 target_compile_definitions(snb_server PRIVATE -DHAS_UNCAUGHT_EXCEPTIONS=1)
 
 if(USE_SHARED_LIVEGRAPH)
-    target_link_libraries(snb_server Threads::Threads OpenMP::OpenMP_CXX ${TBB_LIBRARIES} rocksdb thrift livegraph)
+    target_link_libraries(snb_server Threads::Threads OpenMP::OpenMP_CXX ${TBB_LIBRARIES} rocksdb thrift /mnt/ssd/xiayanwen/test1/LiveGraph-snb/deps/LiveGraph/build/liblivegraph.so)
+    # message("Yes")
     # target_link_libraries(snb_server Threads::Threads OpenMP::OpenMP_CXX ${TBB_LIBRARIES} thrift livegraph)
 else()
     target_link_libraries(snb_server Threads::Threads OpenMP::OpenMP_CXX ${TBB_LIBRARIES} rocksdb thrift corelib)
+    # message("No")
     # target_link_libraries(snb_server Threads::Threads OpenMP::OpenMP_CXX ${TBB_LIBRARIES} thrift corelib)
 endif()
 add_dependencies(snb_server rocksdblib)

@@ -10,7 +10,7 @@ void InteractiveHandler::query8(std::vector<Query8Response> & _return, const Que
     auto posts = multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Post_creator});
     auto comments = multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Comment_creator});
     std::map<std::pair<int64_t, uint64_t>, snb::MessageSchema::Message*> idx;
-
+    // std::cout << "query case8" << std::endl;
     for(size_t i=0;i<posts.size();i++)
     {
         uint64_t vid = posts[i];

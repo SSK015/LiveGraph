@@ -2,6 +2,7 @@
 
 void InteractiveHandler::query6(std::vector<Query6Response> & _return, const Query6Request& request)
 {
+    // std::cout << "query case6" << std::endl;
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;

@@ -10,7 +10,7 @@ void InteractiveHandler::query9(std::vector<Query9Response> & _return, const Que
     auto friends = multihop(engine, vid, 2, {(label_t)snb::EdgeSchema::Person2Person, (label_t)snb::EdgeSchema::Person2Person});
 
     std::map<std::pair<int64_t, uint64_t>, snb::MessageSchema::Message*> idx;
-
+    // std::cout << "query case9" << std::endl;
     for(size_t i=0;i<friends.size();i++)
     {
         uint64_t vid = friends[i];

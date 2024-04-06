@@ -1,3 +1,4 @@
+#include <iostream>
 #include "manual.hpp"
 
 void InteractiveHandler::query1(std::vector<Query1Response> & _return, const Query1Request& request)
@@ -13,7 +14,7 @@ void InteractiveHandler::query1(std::vector<Query1Response> & _return, const Que
     std::vector<size_t> next_frontier;
     std::unordered_set<uint64_t> person_hash{vid};
     uint64_t root = vid;
-
+        // std::cout << "query case1" << std::endl;
     for (int k=0;k<3 && idx.size()<(size_t)request.limit;k++)
     {
         next_frontier.clear();

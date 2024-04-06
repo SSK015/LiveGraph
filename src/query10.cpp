@@ -2,12 +2,13 @@
 
 void InteractiveHandler::query10(std::vector<Query10Response> & _return, const Query10Request& request)
 {
+    // std::cout << "query case10" << std::endl;
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
     auto engine = graph->begin_read_only_transaction();
     if(engine.get_vertex(vid).data() == nullptr) return;
-
+    // std::cout << "query case10" << std::endl;
     std::vector<size_t> frontier = {vid};
     std::vector<size_t> next_frontier;
     std::unordered_set<uint64_t> person_hash{vid};

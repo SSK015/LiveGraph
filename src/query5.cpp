@@ -9,7 +9,7 @@ void InteractiveHandler::query5(std::vector<Query5Response> & _return, const Que
     if(engine.get_vertex(vid).data() == nullptr) return;
     auto friends = multihop(engine, vid, 2, {(label_t)snb::EdgeSchema::Person2Person, (label_t)snb::EdgeSchema::Person2Person});
     std::unordered_map<uint64_t, int> idx;
-
+    // std::cout << "query case5" << std::endl;
     for(size_t i=0;i<friends.size();i++)
     {
         uint64_t vid = friends[i];

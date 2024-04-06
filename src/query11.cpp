@@ -14,7 +14,7 @@ void InteractiveHandler::query11(std::vector<Query11Response> & _return, const Q
     auto orgs = multihop(engine, country, 1, {(label_t)snb::EdgeSchema::Place2Org});
 
     std::map<std::tuple<int, int64_t, std::string>, uint64_t, std::greater<std::tuple<int, int64_t, std::string>>> idx;
-
+    // std::cout << "query case11" << std::endl;
     for(size_t i=0;i<orgs.size();i++)
     {
         uint64_t vid = orgs[i];
@@ -23,7 +23,7 @@ void InteractiveHandler::query11(std::vector<Query11Response> & _return, const Q
         while (nbrs.valid())
         {
             int32_t date = *(uint32_t*)nbrs.edge_data().data();
-            if(date < request.workFromYear)
+            if (date < request.workFromYear)
             {
                 auto person_vid = nbrs.dst_id();
                 if(*std::lower_bound(friends.begin(), friends.end(), person_vid) == person_vid)
