@@ -1,8 +1,39 @@
 #include "manual.hpp"
+#include <fstream>
 
 void InteractiveHandler::query3(std::vector<Query3Response> & _return, const Query3Request& request)
 {
     _return.clear();
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+//   int64_t personId;
+//   std::string countryXName;
+//   std::string countryYName;
+//   int64_t startDate;
+//   int32_t durationDays;
+//   int32_t limit;
+    if (outputFile.is_open()) {
+        outputFile << "3";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.countryXName;
+        outputFile << " ";
+        outputFile << request.countryYName;
+        outputFile << " ";
+        outputFile << request.startDate;
+        outputFile << " ";
+        outputFile << request.durationDays;
+        outputFile << " ";      
+        outputFile << request.limit << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     uint64_t vid = personSchema.findId(request.personId);
     uint64_t countryX = placeSchema.findName(request.countryXName);
     uint64_t countryY = placeSchema.findName(request.countryYName);

@@ -859,8 +859,8 @@ class Query6Request : public virtual ::apache::thrift::TBase {
   int64_t personId;
   std::string tagName;
   int32_t limit;
-
   _Query6Request__isset __isset;
+
 
   void __set_personId(const int64_t val);
 

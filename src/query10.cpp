@@ -1,8 +1,30 @@
 #include "manual.hpp"
+#include <fstream>
 
+//   int64_t personId;
+//   int32_t month;
+//   int32_t limit;
 void InteractiveHandler::query10(std::vector<Query10Response> & _return, const Query10Request& request)
 {
     // std::cout << "query case10" << std::endl;
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "10";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.month;
+        outputFile << " ";      
+        outputFile << request.limit << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;

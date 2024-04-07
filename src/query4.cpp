@@ -1,7 +1,32 @@
 #include "manual.hpp"
+#include <fstream>
 
 void InteractiveHandler::query4(std::vector<Query4Response> & _return, const Query4Request& request)
 {
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+//       int64_t personId;
+//   int64_t startDate;
+//   int32_t durationDays;
+//   int32_t limit;
+    if (outputFile.is_open()) {
+        outputFile << "4";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.startDate;
+        outputFile << " ";
+        outputFile << request.durationDays;
+        outputFile << " ";
+        outputFile << request.limit << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;

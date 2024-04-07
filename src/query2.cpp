@@ -1,9 +1,30 @@
 #include "manual.hpp"
+#include <fstream>
 
 void InteractiveHandler::query2(std::vector<Query2Response> & _return, const Query2Request& request)
 {
         // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     _return.clear();
+    
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "2";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.maxDate;
+        outputFile << " ";      
+        outputFile << request.limit << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
+
     uint64_t vid = personSchema.findId(request.personId);
     if(vid == (uint64_t)-1) return;
     auto engine = graph->begin_read_only_transaction();

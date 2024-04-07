@@ -1,9 +1,28 @@
 #include "manual.hpp"
+#include <fstream>
 
+//   int64_t person1Id;
+//   int64_t person2Id;
 void InteractiveHandler::query14(std::vector<Query14Response> & _return, const Query14Request& request)
 {
     // std::cout << "query case14" << std::endl;
         // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "14";
+        outputFile << " ";
+        outputFile << request.person1Id;
+        outputFile << " ";
+        outputFile << request.person2Id << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     _return.clear();
     uint64_t vid1 = personSchema.findId(request.person1Id);
     uint64_t vid2 = personSchema.findId(request.person2Id);
