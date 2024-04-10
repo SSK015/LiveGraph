@@ -1,7 +1,25 @@
 #include "manual.hpp"
+#include <fstream>
+
+//   int64_t person1Id;
+//   int64_t person2Id;
+//   int64_t creationDate;
 
 void InteractiveHandler::update8(const Update8Request& request)
 {
+        pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "29";
+        outputFile << " ";
+        outputFile << request.person1Id;
+        outputFile << " ";
+        outputFile << request.person2Id;
+        outputFile << " ";
+        outputFile << request.creationDate;
+        outputFile << std::endl;
+    }
     uint64_t left = personSchema.findId(request.person1Id);
     uint64_t right = personSchema.findId(request.person2Id);
     if(left == (uint64_t)-1) return;

@@ -1,7 +1,56 @@
 #include "manual.hpp"
+#include <fstream>
+
+//   int64_t commentId;
+//   int64_t creationDate;
+//   std::string locationIp;
+//   std::string browserUsed;
+//   std::string content;
+//   int32_t length;
+//   int64_t authorPersonId;
+//   int64_t countryId;
+//   int64_t replyToPostId;
+//   int64_t replyToCommentId;
+//   std::vector<int64_t>  tagIds;
 
 void InteractiveHandler::update7(const Update7Request& request)
 {
+        pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "28";
+        outputFile << " ";
+        outputFile << request.commentId;
+        outputFile << " ";
+        outputFile << request.creationDate;
+        outputFile << " ";
+        outputFile << request.locationIp;
+        outputFile << " ";
+        outputFile << request.browserUsed;
+        outputFile << " ";
+        outputFile << request.content;
+        outputFile << " ";
+        outputFile << request.length;
+        outputFile << " ";
+        outputFile << request.authorPersonId;
+        outputFile << " ";
+        outputFile << request.countryId;
+        outputFile << " ";
+        outputFile << request.replyToPostId;
+//   int64_t replyToPostId;
+//   int64_t replyToCommentId;
+        outputFile << " ";
+        outputFile << request.replyToCommentId;
+
+        auto size = request.tagIds.size();
+        uint64_t idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.tagIds[idx++];
+        }
+        outputFile << std::endl;
+    }
     uint64_t vid = commentSchema.findId(request.commentId);
     if(vid != (uint64_t)-1) return;
     uint64_t person_vid = personSchema.findId(request.authorPersonId);

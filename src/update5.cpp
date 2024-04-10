@@ -1,7 +1,24 @@
 #include "manual.hpp"
+#include <fstream>
+
+//   int64_t personId;
+//   int64_t forumId;
+//   int64_t joinDate;
 
 void InteractiveHandler::update5(const Update5Request& request)
 {
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "26";
+        outputFile << " ";
+        outputFile << request.personId;
+        outputFile << " ";
+        outputFile << request.forumId;
+        outputFile << " ";
+        outputFile << request.joinDate << std::endl;
+    }
     uint64_t person_vid = personSchema.findId(request.personId);
     uint64_t forum_vid = forumSchema.findId(request.forumId);
     if(person_vid == (uint64_t)-1) return;

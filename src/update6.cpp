@@ -1,7 +1,57 @@
 #include "manual.hpp"
+#include <fstream>
+
+//   int64_t postId;
+//   std::string imageFile;
+//   int64_t creationDate;
+//   std::string locationIp;
+//   std::string browserUsed;
+//   std::string language;
+//   std::string content;
+//   int32_t length;
+//   int64_t authorPersonId;
+//   int64_t forumId;
+//   int64_t countryId;
+//   std::vector<int64_t>  tagIds;
 
 void InteractiveHandler::update6(const Update6Request& request)
 {
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "27";
+        outputFile << " ";
+        outputFile << request.postId;
+        outputFile << " ";
+        outputFile << request.imageFile;
+        outputFile << " ";
+        outputFile << request.creationDate;
+        outputFile << " ";
+        outputFile << request.locationIp;
+        outputFile << " ";
+        outputFile << request.browserUsed;
+        outputFile << " ";
+        outputFile << request.language;
+        outputFile << " ";
+        outputFile << request.content;
+        outputFile << " ";
+        outputFile << request.length;
+        outputFile << " ";
+        outputFile << request.authorPersonId;
+        outputFile << " ";
+        outputFile << request.forumId;
+        outputFile << " ";
+        outputFile << request.countryId;
+
+        auto size = request.tagIds.size();
+        uint64_t idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.tagIds[idx++];
+        }
+        outputFile << std::endl;
+    }
     uint64_t vid = postSchema.findId(request.postId);
     if(vid != (uint64_t)-1) return;
     uint64_t person_vid = personSchema.findId(request.authorPersonId);

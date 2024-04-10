@@ -1,7 +1,122 @@
 #include "manual.hpp"
+#include <fstream>
+
+//   int64_t personId;
+//   std::string personFirstName;
+//   std::string personLastName;
+//   std::string gender;
+//   int64_t birthday;
+//   int64_t creationDate;
+//   std::string locationIp;
+//   std::string browserUsed;
+//   int64_t cityId;
+//   std::vector<std::string>  languages;
+//   std::vector<std::string>  emails;
+//   std::vector<int64_t>  tagIds;
+//   std::vector<int64_t>  studyAt_id;
+//   std::vector<int32_t>  studyAt_year;
+//   std::vector<int64_t>  workAt_id;
+//   std::vector<int32_t>  workAt_year;
+
 
 void InteractiveHandler::update1(const interactive::Update1Request& request)
 {
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+    if (outputFile.is_open()) {
+        outputFile << "22";
+        outputFile << " ";
+        outputFile << request.personFirstName;
+        outputFile << " ";
+        outputFile << request.personLastName;
+        outputFile << " ";
+        outputFile << request.gender;
+        outputFile << " ";
+        outputFile << request.birthday;
+        outputFile << " ";
+        outputFile << request.creationDate;
+        outputFile << " ";
+        outputFile << request.locationIp;
+        outputFile << " ";
+        outputFile << request.browserUsed;
+        outputFile << " ";
+        outputFile << request.cityId;
+        
+        auto size = request.languages.size();
+        uint64_t idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.languages[idx++];
+        }
+        outputFile << " ";
+
+        size = request.emails.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.emails[idx++];
+        }
+        outputFile << " ";
+
+        size = request.tagIds.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.tagIds[idx++];
+        }
+        outputFile << " ";
+
+        size = request.studyAt_id.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.studyAt_id[idx++];
+        }
+        outputFile << " ";
+
+        size = request.studyAt_year.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.studyAt_year[idx++];
+        }
+        outputFile << " ";
+
+        size = request.workAt_id.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.workAt_id[idx++];
+        }
+        outputFile << " ";
+
+        size = request.workAt_year.size();
+        idx = 0; 
+        while (size--) {
+            outputFile << " ";
+            outputFile << request.workAt_year[idx++];
+        }
+        outputFile << std::endl;
+        // outputFile << " ";
+        // outputFile << request.emails;
+        // outputFile << " ";
+        // outputFile << request.tagIds;
+        // outputFile << " ";
+        // outputFile << request.studyAt_id;
+        // outputFile << " ";
+        // outputFile << request.studyAt_year;    
+        // outputFile << " ";
+        // outputFile << request.workAt_id;    
+        // outputFile << " ";
+        // outputFile << request.workAt_year << std::endl;
+        outputFile.close();
+        // std::cout << "Int64写入文件成功" << std::endl;
+    } else {
+        std::cerr << "无法打开文件" << std::endl;
+        // return 1;
+        return;
+    }
     uint64_t vid = personSchema.findId(request.personId);
     if(vid != (uint64_t)-1) return;
     uint64_t place_vid = placeSchema.findId(request.cityId);
