@@ -793,25 +793,6 @@ public:
     //   int64_t personId;
     //   std::string tagName;
     //   int32_t limit;
-    pthread_t tid = pthread_self();
-    std::string filePath =
-        "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
-    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
-    if (outputFile.is_open()) {
-      outputFile << "6";
-      outputFile << " ";
-      outputFile << request.personId;
-      outputFile << " ";
-      outputFile << request.tagName;
-      outputFile << " ";
-      outputFile << request.limit << std::endl;
-      outputFile.close();
-      // std::cout << "Int64写入文件成功" << std::endl;
-    } else {
-      std::cerr << "无法打开文件" << std::endl;
-      // return 1;
-      return;
-    }
     // _return.clear();
     uint64_t vid = personSchema.findId(request.personId);
     if (vid == (uint64_t)-1)
@@ -864,6 +845,532 @@ public:
     }
   }
 
+  void HandleQuery7(const Query7Request &request) {
+
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    auto friends =
+        multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Person});
+    friends.push_back(std::numeric_limits<uint64_t>::max());
+    auto posts = multihop(engine, vid, 1,
+                          {(label_t)snb::EdgeSchema::Person2Post_creator});
+    auto comments = multihop(
+        engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Comment_creator});
+    std::map<std::pair<int64_t, uint64_t>, std::tuple<uint64_t, uint64_t>> idx;
+    std::unordered_map<uint64_t, std::pair<int64_t, uint64_t>> person_hash;
+    // std::cout << "query case7" << std::endl;
+    for (size_t i = 0; i < posts.size(); i++) {
+      uint64_t vid = posts[i];
+      {
+        auto nbrs =
+            engine.get_edges(vid, (label_t)snb::EdgeSchema::Post2Person_like);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          auto person =
+              (snb::PersonSchema::Person *)engine.get_vertex(nbrs.dst_id())
+                  .data();
+          uint64_t person_id = person->id;
+          auto key = std::make_pair(-date, person_id);
+          auto value = std::make_tuple(nbrs.dst_id(), vid);
+          std::unordered_map<uint64_t, std::pair<int64_t, uint64_t>>::iterator
+              iter;
+
+          if ((idx.size() < (size_t)request.limit ||
+               idx.rbegin()->first > key) &&
+              ((iter = person_hash.find(person_id)) == person_hash.end() ||
+               iter->second > key)) {
+            idx.emplace(key, value);
+            if (iter == person_hash.end()) {
+              person_hash.emplace(person_id, key);
+              while (idx.size() > (size_t)request.limit) {
+                person_hash.erase(idx.rbegin()->first.second);
+                idx.erase(idx.rbegin()->first);
+              }
+            } else {
+              idx.erase(iter->second);
+              iter->second = key;
+            }
+
+          } else {
+            flag = idx.size() < (size_t)request.limit ||
+                   idx.rbegin()->first.first > key.first;
+          }
+          nbrs.next();
+        }
+      }
+    }
+
+    for (size_t i = 0; i < comments.size(); i++) {
+      uint64_t vid = comments[i];
+      {
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Comment2Person_like);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          auto person =
+              (snb::PersonSchema::Person *)engine.get_vertex(nbrs.dst_id())
+                  .data();
+          uint64_t person_id = person->id;
+          auto key = std::make_pair(-date, person_id);
+          auto value = std::make_tuple(nbrs.dst_id(), vid);
+          std::unordered_map<uint64_t, std::pair<int64_t, uint64_t>>::iterator
+              iter;
+
+          if ((idx.size() < (size_t)request.limit ||
+               idx.rbegin()->first > key) &&
+              ((iter = person_hash.find(person_id)) == person_hash.end() ||
+               iter->second > key)) {
+            idx.emplace(key, value);
+            if (iter == person_hash.end()) {
+              person_hash.emplace(person_id, key);
+              while (idx.size() > (size_t)request.limit) {
+                person_hash.erase(idx.rbegin()->first.second);
+                idx.erase(idx.rbegin()->first);
+              }
+            } else {
+              idx.erase(iter->second);
+              iter->second = key;
+            }
+
+          } else {
+            flag = idx.size() < (size_t)request.limit ||
+                   idx.rbegin()->first.first > key.first;
+          }
+          nbrs.next();
+        }
+      }
+    }
+
+    // for (auto p : idx) {
+    //   _return.emplace_back();
+    //   uint64_t person_vid = std::get<0>(p.second);
+    //   auto person =
+    //       (snb::PersonSchema::Person *)engine.get_vertex(person_vid).data();
+    //   uint64_t message_vid = std::get<1>(p.second);
+    //   uint64_t like_time = -p.first.first;
+    //   auto message =
+    //       (snb::MessageSchema::Message
+    //       *)engine.get_vertex(message_vid).data();
+    //   _return.back().personId = person->id;
+    //   _return.back().personFirstName =
+    //       std::string(person->firstName(), person->firstNameLen());
+    //   _return.back().personLastName =
+    //       std::string(person->lastName(), person->lastNameLen());
+    //   _return.back().likeCreationDate = like_time;
+    //   _return.back().commentOrPostId = message->id;
+    //   _return.back().commentOrPostContent =
+    //       message->contentLen()
+    //           ? std::string(message->content(), message->contentLen())
+    //           : std::string(message->imageFile(), message->imageFileLen());
+    //   _return.back().minutesLatency =
+    //       (like_time - message->creationDate) / (60lu * 1000lu);
+    //   _return.back().isNew = (*std::lower_bound(friends.begin(),
+    //   friends.end(),
+    //                                             person_vid)) != person_vid;
+    // }
+  }
+
+  void HandleQuery8(const Query8Request &request) {
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    auto posts = multihop(engine, vid, 1,
+                          {(label_t)snb::EdgeSchema::Person2Post_creator});
+    auto comments = multihop(
+        engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Comment_creator});
+    std::map<std::pair<int64_t, uint64_t>, snb::MessageSchema::Message *> idx;
+    // std::cout << "query case8" << std::endl;
+    for (size_t i = 0; i < posts.size(); i++) {
+      uint64_t vid = posts[i];
+      {
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Message2Message_down);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          auto message =
+              (snb::MessageSchema::Message *)engine.get_vertex(nbrs.dst_id())
+                  .data();
+          auto key = std::make_pair(-date, message->id);
+          auto value = message;
+
+          if (idx.size() < (size_t)request.limit || idx.rbegin()->first > key) {
+            idx.emplace(key, value);
+            while (idx.size() > (size_t)request.limit)
+              idx.erase(idx.rbegin()->first);
+          } else {
+            flag = idx.rbegin()->first.first > key.first;
+          }
+          nbrs.next();
+        }
+      }
+    }
+
+    for (size_t i = 0; i < comments.size(); i++) {
+      uint64_t vid = comments[i];
+      {
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Message2Message_down);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          auto message =
+              (snb::MessageSchema::Message *)engine.get_vertex(nbrs.dst_id())
+                  .data();
+          auto key = std::make_pair(-date, message->id);
+          auto value = message;
+          std::unordered_map<uint64_t, std::pair<int64_t, uint64_t>>::iterator
+              iter;
+
+          if (idx.size() < (size_t)request.limit || idx.rbegin()->first > key) {
+            idx.emplace(key, value);
+            while (idx.size() > (size_t)request.limit)
+              idx.erase(idx.rbegin()->first);
+          } else {
+            flag = idx.rbegin()->first.first > key.first;
+          }
+          nbrs.next();
+        }
+      }
+    }
+  }
+
+  void HandleQuery9(const Query9Request &request) {
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    auto friends = multihop(engine, vid, 2,
+                            {(label_t)snb::EdgeSchema::Person2Person,
+                             (label_t)snb::EdgeSchema::Person2Person});
+
+    std::map<std::pair<int64_t, uint64_t>, snb::MessageSchema::Message *> idx;
+    // std::cout << "query case9" << std::endl;
+    for (size_t i = 0; i < friends.size(); i++) {
+      uint64_t vid = friends[i];
+      {
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Person2Post_creator);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          if (date < request.maxDate) {
+            auto message =
+                (snb::MessageSchema::Message *)engine.get_vertex(nbrs.dst_id())
+                    .data();
+            auto key = std::make_pair(-date, message->id);
+            auto value = message;
+
+            if (idx.size() < (size_t)request.limit ||
+                idx.rbegin()->first > key) {
+              idx.emplace(key, value);
+              while (idx.size() > (size_t)request.limit)
+                idx.erase(idx.rbegin()->first);
+            } else {
+              flag = idx.rbegin()->first.first > key.first;
+            }
+          }
+          nbrs.next();
+        }
+      }
+      {
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Person2Comment_creator);
+        bool flag = true;
+        while (nbrs.valid() && flag) {
+          int64_t date = *(uint64_t *)nbrs.edge_data().data();
+          if (date < request.maxDate) {
+            auto message =
+                (snb::MessageSchema::Message *)engine.get_vertex(nbrs.dst_id())
+                    .data();
+            auto key = std::make_pair(-date, message->id);
+            auto value = message;
+
+            if (idx.size() < (size_t)request.limit ||
+                idx.rbegin()->first > key) {
+              idx.emplace(key, value);
+              while (idx.size() > (size_t)request.limit)
+                idx.erase(idx.rbegin()->first);
+            } else {
+              flag = idx.rbegin()->first.first > key.first;
+            }
+          }
+          nbrs.next();
+        }
+      }
+    }
+  }
+
+  void HandleQuery10(const Query10Request &request) {
+    // std::cout << "query case10" << std::endl;
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    // std::cout << "query case10" << std::endl;
+    std::vector<size_t> frontier = {vid};
+    std::vector<size_t> next_frontier;
+    std::unordered_set<uint64_t> person_hash{vid};
+    uint64_t root = vid;
+    for (int k = 0; k < 2; k++) {
+      next_frontier.clear();
+      for (auto vid : frontier) {
+        auto nbrs =
+            engine.get_edges(vid, (label_t)snb::EdgeSchema::Person2Person);
+        while (nbrs.valid()) {
+          if (nbrs.dst_id() != root &&
+              person_hash.find(nbrs.dst_id()) == person_hash.end()) {
+            next_frontier.push_back(nbrs.dst_id());
+            person_hash.emplace(nbrs.dst_id());
+          }
+          nbrs.next();
+        }
+      }
+      frontier.swap(next_frontier);
+    }
+    auto friends = frontier;
+    std::sort(friends.begin(), friends.end());
+
+    auto tags =
+        multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Tag});
+    auto nextMonth = request.month % 12 + 1;
+    tags.push_back(std::numeric_limits<uint64_t>::max());
+    std::map<std::pair<int, uint64_t>, snb::PersonSchema::Person *> idx;
+
+    for (size_t i = 0; i < friends.size(); i++) {
+      uint64_t vid = friends[i];
+      auto person =
+          (snb::PersonSchema::Person *)(engine.get_vertex(vid)).data();
+      std::pair<int, int> monday;
+
+      { monday = to_monday(person->birthday); }
+      if ((monday.first == request.month && monday.second >= 21) ||
+          (monday.first == nextMonth && monday.second < 22)) {
+        int commonInterestScore = 0;
+        auto nbrs = engine.get_edges(
+            vid, (label_t)snb::EdgeSchema::Person2Post_creator);
+        while (nbrs.valid()) {
+          bool flag = false;
+          uint64_t vid = nbrs.dst_id();
+          {
+            auto nbrs =
+                engine.get_edges(vid, (label_t)snb::EdgeSchema::Post2Tag);
+            while (nbrs.valid() && !flag) {
+              uint64_t tag = nbrs.dst_id();
+              if (*std::lower_bound(tags.begin(), tags.end(), tag) == tag) {
+                flag = true;
+              }
+              nbrs.next();
+            }
+          }
+          if (flag)
+            commonInterestScore++;
+          else
+            commonInterestScore--;
+          nbrs.next();
+        }
+        auto key = std::make_pair(-commonInterestScore, person->id);
+        auto value = person;
+
+        if (idx.size() < (size_t)request.limit || idx.rbegin()->first > key) {
+          idx.emplace(key, value);
+          while (idx.size() > (size_t)request.limit)
+            idx.erase(idx.rbegin()->first);
+        }
+      }
+    }
+  }
+
+  void HandleQuery11(const Query11Request &request) {
+
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    uint64_t country = placeSchema.findName(request.countryName);
+    if (country == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    auto friends = multihop(engine, vid, 2,
+                            {(label_t)snb::EdgeSchema::Person2Person,
+                             (label_t)snb::EdgeSchema::Person2Person});
+    friends.push_back(std::numeric_limits<uint64_t>::max());
+    auto orgs =
+        multihop(engine, country, 1, {(label_t)snb::EdgeSchema::Place2Org});
+
+    std::map<std::tuple<int, int64_t, std::string>, uint64_t,
+             std::greater<std::tuple<int, int64_t, std::string>>>
+        idx;
+    // std::cout << "query case11" << std::endl;
+    for (size_t i = 0; i < orgs.size(); i++) {
+      uint64_t vid = orgs[i];
+      auto nbrs =
+          engine.get_edges(vid, (label_t)snb::EdgeSchema::Org2Person_work);
+      auto org = (snb::OrgSchema::Org *)engine.get_vertex(vid).data();
+      while (nbrs.valid()) {
+        int32_t date = *(uint32_t *)nbrs.edge_data().data();
+        if (date < request.workFromYear) {
+          auto person_vid = nbrs.dst_id();
+          if (*std::lower_bound(friends.begin(), friends.end(), person_vid) ==
+              person_vid) {
+            auto person =
+                (snb::PersonSchema::Person *)engine.get_vertex(person_vid)
+                    .data();
+            uint64_t person_id = person->id;
+            auto key =
+                std::make_tuple(-date, -(int64_t)person_id,
+                                std::string(org->name(), org->nameLen()));
+            auto value = person_vid;
+
+            if (idx.size() < (size_t)request.limit ||
+                idx.rbegin()->first < key) {
+              idx.emplace(key, value);
+              while (idx.size() > (size_t)request.limit)
+                idx.erase(idx.rbegin()->first);
+            }
+          }
+        }
+        nbrs.next();
+      }
+    }
+  }
+
+  void HandleQuery12(const Query12Request &request) {
+    // std::cout << "query case12" << std::endl;
+    uint64_t vid = personSchema.findId(request.personId);
+    if (vid == (uint64_t)-1)
+      return;
+    uint64_t tagclassId = tagclassSchema.findName(request.tagClassName);
+    if (tagclassId == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid).data() == nullptr)
+      return;
+    auto friends =
+        multihop(engine, vid, 1, {(label_t)snb::EdgeSchema::Person2Person});
+    auto tags =
+        multihop_another_etype(engine, tagclassId, 65536,
+                               (label_t)snb::EdgeSchema::TagClass2TagClass_down,
+                               (label_t)snb::EdgeSchema::TagClass2Tag);
+    tags.push_back(std::numeric_limits<uint64_t>::max());
+    std::map<std::pair<int, uint64_t>,
+             std::pair<uint64_t, std::vector<uint64_t>>>
+        idx;
+
+    // std::cout << "query case12" << std::endl;
+    for (size_t i = 0; i < friends.size(); i++) {
+      uint64_t vid = friends[i];
+      int count = 0;
+      std::set<uint64_t> tagSet;
+      auto nbrs = engine.get_edges(
+          vid, (label_t)snb::EdgeSchema::Person2Comment_creator);
+      while (nbrs.valid()) {
+        bool flag = false;
+        auto message =
+            (snb::MessageSchema::Message *)engine.get_vertex(nbrs.dst_id())
+                .data();
+        uint64_t vid = message->replyOfPost;
+        if (vid != (uint64_t)-1) {
+          auto nbrs = engine.get_edges(vid, (label_t)snb::EdgeSchema::Post2Tag);
+          while (nbrs.valid()) {
+            uint64_t tag = nbrs.dst_id();
+            if (*std::lower_bound(tags.begin(), tags.end(), tag) == tag) {
+              flag = true;
+              tagSet.emplace(tag);
+            }
+            nbrs.next();
+          }
+        }
+        if (flag)
+          count++;
+        nbrs.next();
+      }
+      if (count) {
+        auto person =
+            (snb::PersonSchema::Person *)engine.get_vertex(vid).data();
+        uint64_t person_id = person->id;
+        auto key = std::make_pair(-count, person_id);
+        std::vector<uint64_t> tagV;
+        for (auto p : tagSet)
+          tagV.push_back(p);
+        auto value = std::make_pair(vid, tagV);
+
+        if (idx.size() < (size_t)request.limit || idx.rbegin()->first > key) {
+          idx.emplace(key, value);
+          while (idx.size() > (size_t)request.limit)
+            idx.erase(idx.rbegin()->first);
+        }
+      }
+    }
+  }
+
+  void HandleQuery13(const Query13Request &request) {
+    // std::cout << "query case13" << std::endl;
+    uint64_t vid1 = personSchema.findId(request.person1Id);
+    uint64_t vid2 = personSchema.findId(request.person2Id);
+    if (vid1 == (uint64_t)-1)
+      return;
+    if (vid2 == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid1).data() == nullptr)
+      return;
+    if (engine.get_vertex(vid2).data() == nullptr)
+      return;
+  }
+
+  void HandleQuery14(const Query14Request &request) {
+
+    uint64_t vid1 = personSchema.findId(request.person1Id);
+    uint64_t vid2 = personSchema.findId(request.person2Id);
+    if (vid1 == (uint64_t)-1)
+      return;
+    if (vid2 == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    if (engine.get_vertex(vid1).data() == nullptr)
+      return;
+    if (engine.get_vertex(vid2).data() == nullptr)
+      return;
+    auto paths = pairwiseShortestPath_path(
+        engine, vid1, vid2, (label_t)snb::EdgeSchema::Person2Person);
+    std::sort(paths.begin(), paths.end(),
+              [](const std::pair<double, std::vector<uint64_t>> &a,
+                 const std::pair<double, std::vector<uint64_t>> &b) {
+                return a.first > b.first;
+              });
+    std::unordered_map<uint64_t, uint64_t> idx;
+  }
+
+  void HandleShortQuery1(const ShortQuery1Request &request) {
+
+    uint64_t vid = personSchema.findId(request.personId);
+    // std::ofstream outputFile(filePath);
+    // std::cout << "Thread ID: " << tid << std::endl;
+    // _return = ShortQuery1Response();
+
+    if (vid == (uint64_t)-1)
+      return;
+    auto engine = graph->begin_read_only_transaction();
+    auto person = (snb::PersonSchema::Person *)engine.get_vertex(vid).data();
+    if (!person)
+      return;
+    // std::cout << _return.firstName << std::endl;
+  }
   // void query2(std::vector<Query2Response> & _return, const Query2Request&
   // request);
 
