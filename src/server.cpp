@@ -1611,7 +1611,7 @@ int main(int argc, char **argv) {
   // ::server->serve();
 
   std::vector<std::thread> threads;
-  for (unsigned int i = 0; i < 8; ++i) {
+  for (unsigned int i = 0; i < workerCount; ++i) {
     int threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
     int threadNumber = i + 1;
     threads.emplace_back(
@@ -1630,7 +1630,9 @@ int main(int argc, char **argv) {
   std::chrono::microseconds duration =
       std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-  std::cout << (6600ull * 8 * 1000000) / duration.count() << std::endl;
+  std::cout << duration.count() / 1000000 << "s" << std::endl;
+  //   std::cout << (240000 * 8 * 1000000) / duration.count() << "s" <<
+  //   std::endl;
   // ParseRequests();
   // auto it = new StaticHandler(graph, personSchema, placeSchema, orgSchema,
   // postSchema, commentSchema, tagSchema, tagclassSchema, forumSchema);
