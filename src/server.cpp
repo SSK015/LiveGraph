@@ -1011,14 +1011,272 @@ void ParseId(int threadId, int threadNumber) {
       request.limit = limit;
       it->HandleQuery4(request);
     }
+    case QUERY5: {
+      Query5Request request;
+      int64_t personId;
+      int64_t minDate;
+      int32_t limit;
+      if (!(iss >> personId >> minDate >> limit)) {
+        continue;
+      }
+      idx++;
+      request.personId = personId;
+      request.minDate = minDate;
+      request.limit = limit;
+
+      it->HandleQuery5(request);
+    }
+    case QUERY6: {
+      Query6Request request;
+      int64_t personId;
+      std::string tagName;
+      int32_t limit;
+      if (!(iss >> personId >> tagName >> limit)) {
+        continue;
+      }
+      idx++;
+      request.personId = personId;
+      request.tagName = tagName;
+
+      //   std::cout << tagName << std::endl;
+      request.limit = limit;
+
+      it->HandleQuery6(request);
+    }
+    case QUERY7: {
+      Query7Request request;
+      int64_t personId;
+      int32_t limit;
+      if (!(iss >> personId >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.limit = limit;
+
+      it->HandleQuery7(request);
+    }
+    case QUERY8: {
+      Query8Request request;
+      int64_t personId;
+      int32_t limit;
+      if (!(iss >> personId >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.limit = limit;
+
+      it->HandleQuery8(request);
+    }
+    case QUERY9: {
+      Query9Request request;
+      int64_t personId;
+      int64_t maxDate;
+      int32_t limit;
+      if (!(iss >> personId >> maxDate >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.maxDate = maxDate;
+      request.limit = limit;
+
+      it->HandleQuery9(request);
+    }
+    case QUERY10: {
+      Query10Request request;
+      int64_t personId;
+      int32_t month;
+      int32_t limit;
+      if (!(iss >> personId >> month >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.month = month;
+      request.limit = limit;
+
+      it->HandleQuery10(request);
+    }
+    case QUERY11: {
+      Query11Request request;
+      int64_t personId;
+      std::string countryName;
+      int32_t workFromYear;
+      int32_t limit;
+      if (!(iss >> personId >> countryName >> workFromYear >> limit)) {
+        continue;
+      }
+      request.personId = personId;
+      request.countryName = countryName;
+      request.workFromYear = workFromYear;
+      request.limit = limit;
+      idx++;
+
+      it->HandleQuery11(request);
+    }
+    case QUERY12: {
+      Query12Request request;
+      int64_t personId;
+      std::string tagClassName;
+      int32_t limit;
+      if (!(iss >> personId >> tagClassName >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.tagClassName = tagClassName;
+      request.limit = limit;
+
+      it->HandleQuery12(request);
+    }
+    case QUERY13: {
+      Query13Request request;
+      int64_t person1Id;
+      int64_t person2Id;
+      if (!(iss >> person1Id >> person2Id)) {
+        continue;
+      }
+      idx++;
+
+      request.person1Id = person1Id;
+      request.person2Id = person2Id;
+
+      it->HandleQuery13(request);
+    }
+    case QUERY14: {
+      Query14Request request;
+      int64_t person1Id;
+      int64_t person2Id;
+      if (!(iss >> person1Id >> person2Id)) {
+        continue;
+      }
+      idx++;
+
+      request.person1Id = person1Id;
+      request.person2Id = person2Id;
+
+      it->HandleQuery14(request);
+    }
+    case SHORTQUERY1: {
+      ShortQuery1Request request;
+      int64_t personId;
+      if (!(iss >> personId)) {
+        continue;
+      }
+      idx++;
+      request.personId = personId;
+
+      it->HandleShortQuery1(request);
+    }
+    case SHORTQUERY2: {
+      ShortQuery2Request request;
+      int64_t personId;
+      int32_t limit;
+      if (!(iss >> personId >> limit)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.limit = limit;
+
+      it->HandleShortQuery2(request);
+    }
+    case SHORTQUERY3: {
+      ShortQuery3Request request;
+      int64_t personId;
+      if (!(iss >> personId)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+
+      it->HandleShortQuery3(request);
+    }
+    case SHORTQUERY4: {
+      ShortQuery4Request request;
+      int64_t messageId;
+      if (!(iss >> messageId)) {
+        continue;
+      }
+      idx++;
+
+      request.messageId = messageId;
+
+      it->HandleShortQuery4(request);
+    }
+    case SHORTQUERY5: {
+      ShortQuery5Request request;
+      int64_t messageId;
+      if (!(iss >> messageId)) {
+        continue;
+      }
+      idx++;
+
+      request.messageId = messageId;
+
+      it->HandleShortQuery5(request);
+    }
+    case SHORTQUERY6: {
+      ShortQuery6Request request;
+      int64_t messageId;
+      if (!(iss >> messageId)) {
+        continue;
+      }
+      idx++;
+
+      request.messageId = messageId;
+
+      //   it->HandleShortQuery6(request);
+    }
+    case SHORTQUERY7: {
+      ShortQuery7Request request;
+      int64_t messageId;
+      if (!(iss >> messageId)) {
+        continue;
+      }
+      idx++;
+
+      request.messageId = messageId;
+
+      it->HandleShortQuery7(request);
+    }
+    case UPDATE1: {
+      Update1Request request;
+    }
+    case UPDATE2: {
+      Update2Request request;
+      int64_t personId;
+      int64_t postId;
+      int64_t creationDate;
+      if (!(iss >> personId >> postId >> creationDate)) {
+        continue;
+      }
+      idx++;
+
+      request.personId = personId;
+      request.postId = postId;
+      request.creationDate = creationDate;
+
+      it->HandleUpdate2(request);
+    }
     default:
       // idx++;
       break;
     }
-    std::string token;
-    while (iss >> token) {
-      // std::cout << token << " ";
-    }
+
+    // std::string token;
+    // while (iss >> token) {
+    //   std::cout << token << " ";
+    // }
     // std::cout << std::endl;
     // std
   }

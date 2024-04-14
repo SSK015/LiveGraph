@@ -1464,8 +1464,7 @@ public:
       return;
   }
 
-  void HandleShortQuery5(ShortQuery5Response &_return,
-                         const ShortQuery5Request &request) {
+  void HandleShortQuery5(const ShortQuery5Request &request) {
     // _return = ShortQuery5Response();
     uint64_t vid = postSchema.findId(request.messageId);
     if (vid == (uint64_t)-1)
