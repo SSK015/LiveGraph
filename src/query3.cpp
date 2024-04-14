@@ -1,18 +1,20 @@
 #include "manual.hpp"
 #include <fstream>
 
-void InteractiveHandler::query3(std::vector<Query3Response> & _return, const Query3Request& request)
-{
-    _return.clear();
-    pthread_t tid = pthread_self();
-    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
-    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
 //   int64_t personId;
 //   std::string countryXName;
 //   std::string countryYName;
 //   int64_t startDate;
 //   int32_t durationDays;
 //   int32_t limit;
+
+void InteractiveHandler::query3(std::vector<Query3Response> & _return, const Query3Request& request)
+{
+    _return.clear();
+    pthread_t tid = pthread_self();
+    std::string filePath = "/mnt/ssd/xiayanwen/test1/data/" + std::to_string(tid) + "trace.txt";
+    std::ofstream outputFile(filePath, std::ios::out | std::ios::app);
+
     if (outputFile.is_open()) {
         outputFile << "3";
         outputFile << " ";

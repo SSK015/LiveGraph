@@ -64,6 +64,12 @@
         "unordered_set": "cpp",
         "regex": "cpp",
         "fstream": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "cstdarg": "cpp",
+        "mutex": "cpp",
+        "numbers": "cpp",
+        "shared_mutex": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }
